@@ -8,11 +8,23 @@
 import SwiftUI
 
 struct ExpenseCardView: View {
+    @Bindable var expense: Expense
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack {
+            VStack(alignment: .leading){
+                Text(expense.title)
+                Text(expense.subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+            }
+            .lineLimit(1)
+            Spacer(minLength: 5)
+            Text(expense.currencyString)
+                .font(.title3.bold())
+        }
     }
 }
 
-#Preview {
-    ExpenseCardView()
-}
+//#Preview {
+//    ExpenseCardView()
+//}

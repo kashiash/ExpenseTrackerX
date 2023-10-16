@@ -421,3 +421,92 @@ aby wyswietlac je pogrupowane potrzebujemy liste podzielić na sekcje
             }
 ```
 
+
+
+Tworzymy widok pomocniczy do wyswietlenia pojedynczego wydatku :
+
+```swift
+struct ExpenseCardView: View {
+    @Bindable var expense: Expense
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading){
+                Text(expense.title)
+                Text(expense.subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+            }
+            .lineLimit(1)
+            Spacer(minLength: 5)
+            Text(expense.currencyString).font(.title3.bold())
+        }
+    }
+}
+```
+
+potrzebujemy rozbudować klase expense o currencyString:
+
+```swift
+    //Curency string
+    var currencyString: String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        return formatter.string( for: amount) ?? ""
+    }
+```
+
+uruchamiamy aplikacje. mozna juz dodawac wydatki i widac je na liście.
+
+Niestety widzimy ze lista nie zawsze sie odświeża - grupowanie nie jest wywoływane przy zmianie, wiec potrzebujemy zmodyfikowac warunek wyliczania grupy wydatkow :
+
+```swift
+        .onChange(of: allExpenses,initial: true) { oldValue, newValue in
+            if newValue.count > oldValue.count || groupedExpenses.isEmpty {
+                createGroupedExpenses(newValue)
+            }
+        }
+```
+
+
+
+Dodamy teraz usuwanie danych z listy. Przy ExpenseCardView dodajemy `swipeActions`
+
+```swift
+ExpenseCardView(expense: expense)
+.swipeActions(edge: .trailing, allowsFullSwipe: false) {
+  //Delete button
+  Button {
+    /// deleting data
+    context.delete(expense)
+  } label: {
+    Image(system: "trash")
+  }
+  .tint(.red)
+}
+```
+
+Musimy dodac do widoku kontekst modelu
+
+```swift
+@Environment(\.modelContext) private var context
+```
+
+
+
+dodatkowo recznie musimy obsluuzyc sytuacje, ze jak z grupy usniemy wszystkie wydatki, to usuwamy grupę:
+
+```swift
+Button {
+  /// deleting data
+  context.delete(expense)
+  withAnimation {
+    group.expenses.removeAll(where: {$0.id == expense.id})
+    if group.expenses.isEmpty {
+      GroupedExpenses.removeAll(where: {$0.id == group.id})
+    }
+  }
+} label: {
+  Image(system: "trash")
+}
+```
+

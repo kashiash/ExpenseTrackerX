@@ -16,13 +16,32 @@ struct ExpensesView: View {
 
     @State private var groupedExpenses: [GroupedExpenses] = []
     @State private var addExpense: Bool = false
+
+    @Environment(\.modelContext) private var context
+
     var body: some View {
         NavigationStack {
             List {
-                ForEach(groupedExpenses) { group in
+                ForEach(groupedExpenses) { $group in
                     Section(group.groupTitle) {
                         ForEach(group.expenses) { expense in
-                    ///CardView
+                            ExpenseCardView(expense: expense)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    //Delete button
+                                    Button {
+                                        /// deleting data
+                                        context.delete(expense)
+                                        withAnimation {
+                                            group.expenses.removeAll(where: {$0.id == expense.id})
+                                            if group.expenses.isEmpty {
+                                                GroupedExpenses.removeAll(where: {$0.id == group.id})
+                                            }
+                                        }
+                                    } label: {
+                                        Image(system: "trash")
+                                    }
+                                    .tint(.red)
+                                }
                         }
                     }
                 }
@@ -45,7 +64,7 @@ struct ExpensesView: View {
             }
         }
         .onChange(of: allExpenses,initial: true) { oldValue, newValue in
-            if groupedExpenses.isEmpty {
+            if newValue.count > oldValue.count || groupedExpenses.isEmpty {
                 createGroupedExpenses(newValue)
             }
         }
