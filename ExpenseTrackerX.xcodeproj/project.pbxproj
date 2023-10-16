@@ -11,6 +11,11 @@
 		762B2D582ADC840F00407F45 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D572ADC840F00407F45 /* ContentView.swift */; };
 		762B2D5A2ADC841000407F45 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 762B2D592ADC841000407F45 /* Assets.xcassets */; };
 		762B2D5E2ADC841000407F45 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 762B2D5D2ADC841000407F45 /* Preview Assets.xcassets */; };
+		762B2D672ADC84DC00407F45 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D662ADC84DC00407F45 /* Expense.swift */; };
+		762B2D692ADC859600407F45 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D682ADC859600407F45 /* Category.swift */; };
+		762B2D6B2ADC878100407F45 /* ExpensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D6A2ADC878100407F45 /* ExpensesView.swift */; };
+		762B2D6D2ADC878D00407F45 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D6C2ADC878D00407F45 /* CategoriesView.swift */; };
+		762B2D6F2ADD0DAE00407F45 /* GroupedExpenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D6E2ADD0DAE00407F45 /* GroupedExpenses.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +25,11 @@
 		762B2D592ADC841000407F45 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		762B2D5B2ADC841000407F45 /* ExpenseTrackerX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExpenseTrackerX.entitlements; sourceTree = "<group>"; };
 		762B2D5D2ADC841000407F45 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		762B2D662ADC84DC00407F45 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
+		762B2D682ADC859600407F45 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		762B2D6A2ADC878100407F45 /* ExpensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpensesView.swift; sourceTree = "<group>"; };
+		762B2D6C2ADC878D00407F45 /* CategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesView.swift; sourceTree = "<group>"; };
+		762B2D6E2ADD0DAE00407F45 /* GroupedExpenses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupedExpenses.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +62,8 @@
 		762B2D542ADC840F00407F45 /* ExpenseTrackerX */ = {
 			isa = PBXGroup;
 			children = (
+				762B2D652ADC843200407F45 /* View */,
+				762B2D642ADC842A00407F45 /* Model */,
 				762B2D552ADC840F00407F45 /* ExpenseTrackerXApp.swift */,
 				762B2D572ADC840F00407F45 /* ContentView.swift */,
 				762B2D592ADC841000407F45 /* Assets.xcassets */,
@@ -67,6 +79,25 @@
 				762B2D5D2ADC841000407F45 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		762B2D642ADC842A00407F45 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				762B2D662ADC84DC00407F45 /* Expense.swift */,
+				762B2D682ADC859600407F45 /* Category.swift */,
+				762B2D6E2ADD0DAE00407F45 /* GroupedExpenses.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		762B2D652ADC843200407F45 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				762B2D6A2ADC878100407F45 /* ExpensesView.swift */,
+				762B2D6C2ADC878D00407F45 /* CategoriesView.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,7 +171,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				762B2D582ADC840F00407F45 /* ContentView.swift in Sources */,
+				762B2D672ADC84DC00407F45 /* Expense.swift in Sources */,
+				762B2D6F2ADD0DAE00407F45 /* GroupedExpenses.swift in Sources */,
+				762B2D6D2ADC878D00407F45 /* CategoriesView.swift in Sources */,
 				762B2D562ADC840F00407F45 /* ExpenseTrackerXApp.swift in Sources */,
+				762B2D6B2ADC878100407F45 /* ExpensesView.swift in Sources */,
+				762B2D692ADC859600407F45 /* Category.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
