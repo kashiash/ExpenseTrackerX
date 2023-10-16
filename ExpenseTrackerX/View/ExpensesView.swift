@@ -15,10 +15,17 @@ struct ExpensesView: View {
     ],animation:.snappy) private var allExpenses: [Expense]
 
     @State private var groupedExpenses: [GroupedExpenses] = []
+    @State private var addExpense: Bool = false
     var body: some View {
         NavigationStack {
             List {
-
+                ForEach(groupedExpenses) { group in
+                    Section(group.groupTitle) {
+                        ForEach(group.expenses) { expense in
+                    ///CardView
+                        }
+                    }
+                }
             }
             .navigationTitle("Expenses")
             .overlay {
@@ -29,7 +36,7 @@ struct ExpensesView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-
+                        addExpense.toggle()
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
@@ -41,6 +48,9 @@ struct ExpensesView: View {
             if groupedExpenses.isEmpty {
                 createGroupedExpenses(newValue)
             }
+        }
+        .sheet(isPresented: $addExpense){
+            AddExpenseView()
         }
     }
 

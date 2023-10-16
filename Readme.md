@@ -197,7 +197,7 @@ func createGroupedExpenses(_ expenses: [Expense]) {
 }
 ```
 
-i mozemy jej użyć 
+i możemy jej użyć 
 
 ```swift
 var body: some View {
@@ -216,5 +216,208 @@ var body: some View {
 
 ## AddExpenseView
 
-Utworzymy teraqz ekran pozwalajacy wpisywac wydatki:
+Utworzymy teraz widok `AddExpenseView`, pozwalajacy wpisywac wydatki:
+
+Standardowo dodajemy context i dismiss
+
+```swift
+import SwiftUI
+import SwiftData
+
+struct AddExpenseView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+
+
+    var body: some View {
+        Text("jakis smutny napis")
+    }
+}
+```
+
+
+
+nastepnie deklarujemy zmienne na dane do edycji:
+
+```swift
+    @State private var title: String = ""
+    @State private var subtitle: String = ""
+    @State private var date: Date = .init()
+    @State private var amount: CGFloat = 0
+    @State private var category: Category?
+```
+
+
+
+Definiujemy szkielet naszego widoku: NavigationStack w nim Lista z toolbarem z przycskami zapisz i anuluj:
+
+```swift
+var body: some View {
+  NavigationStack {
+    List {
+
+    }
+    .navigationTitle("Add Expense")
+    .toolbar {
+      ToolbarItem (placement: .topBarLeading) {
+        Button("Cancel") {
+          dismiss()
+        }
+        .tint(.red)
+      }
+      ToolbarItem (placement: .topBarTrailing) {
+        Button("Add", action: addExpense)
+
+      }
+
+    }
+  }
+}
+
+func addExpense() {
+
+}
+```
+
+
+
+Do zmienncyh dodajemy Query pobierajace kategorie :
+
+```swift
+ @Query(animation: .snappy) private var allCategories: [Category]
+```
+
+definiujemy formater dla kwot :
+
+```swift
+var formatter: NumberFormatter {
+  let  formatter = NumberFormatter()
+  formatter.numberStyle = .decimal
+  formatter.maximumFractionDigits = 2
+  return formatter
+}
+```
+
+Wewnatrz listy dodajemy pola do wprowadzania danych:
+
+```swift
+List {
+  Section("Title"){
+    TextField("Magic keyboard", text: $title)
+  }
+
+  Section("Description"){
+    TextField("Bought keyboard at the Apple Store", text: $subtitle)
+  }
+
+  Section("Amount Spent"){
+    HStack(spacing: 4){
+      Text("$")
+      .fontWeight(.semibold)
+      TextField("0.0",value: $amount,formatter: formatter)
+    }
+  }
+
+  Section("Date"){
+    DatePicker("",selection: $date, displayedComponents: [.date])
+    .datePickerStyle(.graphical)
+    .labelsHidden()
+  }
+
+  if !allCategories.isEmpty {
+    HStack {
+      Text("Category")
+      Spacer()
+      Picker("",selection: $category){
+        ForEach(allCategories) {
+          Text($0.categoryName)
+          .tag($0)
+        }
+
+      }
+      .pickerStyle(.menu)
+      .labelsHidden()
+    }
+  }
+}
+```
+
+
+
+Nie chcemy podwalać na zapisywanie danych gdy nie mamy opisanego zakupu i podanej kwoty:
+
+Tworzymy funkcje do weryfikacji 
+
+```swift
+var formHasNotValidData: Bool {
+  return title.isEmpty || subtitle.isEmpty || amount == .zero
+}
+```
+
+
+
+i na jej podstawie aktywujemy lub wyłączamy przycisk `zapisz` :
+
+```swift
+ToolbarItem (placement: .topBarTrailing) {
+  Button("Add", action: addExpense)
+  .disabled(formHasNotValidData)
+
+}
+```
+
+i na koniec funkcja zapisujaca nasze dane do bazy :
+
+```swift
+    func addExpense() {
+        let expense = Expense(title: title, subtitle: subtitle, amount: amount, date: date, category: category)
+        context.insert(expense)
+        dismiss()
+    }
+```
+
+
+
+Wracamy do Listy wydatków, dodamy teraz wywolanie widoku dopisywania wydatków. Tworzymy zmeinna zarządzająca pokazywanie arkusza z widokiem AddExpense:
+
+```swift
+@State private var addExpense: Bool = false
+```
+
+W przypadku nacisniecia przycisku dodaj ustawiamy ja na true:
+
+```swift
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        addExpense.toggle()
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                    }
+                }
+```
+
+, co spoowduje pokazanie arkusza widoku:
+
+```swift
+        .sheet(isPresented: $addExpense){
+            AddExpenseView()
+        }
+```
+
+
+
+aby wyswietlac je pogrupowane potrzebujemy liste podzielić na sekcje
+
+```swift
+            List {
+                ForEach(groupedExpenses) { group in
+                    Section(group.groupTitle) {
+                        ForEach(group.expenses) { expense in
+                    ///CardView
+                        }
+                    }
+                }
+            }
+```
 

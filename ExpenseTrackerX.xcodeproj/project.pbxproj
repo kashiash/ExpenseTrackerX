@@ -16,6 +16,7 @@
 		762B2D6B2ADC878100407F45 /* ExpensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D6A2ADC878100407F45 /* ExpensesView.swift */; };
 		762B2D6D2ADC878D00407F45 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D6C2ADC878D00407F45 /* CategoriesView.swift */; };
 		762B2D6F2ADD0DAE00407F45 /* GroupedExpenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D6E2ADD0DAE00407F45 /* GroupedExpenses.swift */; };
+		762B2D712ADD2D8C00407F45 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762B2D702ADD2D8C00407F45 /* AddExpenseView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		762B2D6A2ADC878100407F45 /* ExpensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpensesView.swift; sourceTree = "<group>"; };
 		762B2D6C2ADC878D00407F45 /* CategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesView.swift; sourceTree = "<group>"; };
 		762B2D6E2ADD0DAE00407F45 /* GroupedExpenses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupedExpenses.swift; sourceTree = "<group>"; };
+		762B2D702ADD2D8C00407F45 /* AddExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				762B2D6A2ADC878100407F45 /* ExpensesView.swift */,
+				762B2D702ADD2D8C00407F45 /* AddExpenseView.swift */,
 				762B2D6C2ADC878D00407F45 /* CategoriesView.swift */,
 			);
 			path = View;
@@ -173,6 +176,7 @@
 				762B2D582ADC840F00407F45 /* ContentView.swift in Sources */,
 				762B2D672ADC84DC00407F45 /* Expense.swift in Sources */,
 				762B2D6F2ADD0DAE00407F45 /* GroupedExpenses.swift in Sources */,
+				762B2D712ADD2D8C00407F45 /* AddExpenseView.swift in Sources */,
 				762B2D6D2ADC878D00407F45 /* CategoriesView.swift in Sources */,
 				762B2D562ADC840F00407F45 /* ExpenseTrackerXApp.swift in Sources */,
 				762B2D6B2ADC878100407F45 /* ExpensesView.swift in Sources */,
