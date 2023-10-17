@@ -899,3 +899,11 @@ func filterExpenses(_ text: String ){
 }
 ```
 
+
+
+Pomysły na rozbudowę: 
+
+- rejestracja paragonow przez zdjecie
+- rozpoznawanie tekstu
+- zapamietywanie paragonow
+- okno do edycji wpisanego wydatku
