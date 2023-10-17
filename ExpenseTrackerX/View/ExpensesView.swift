@@ -22,23 +22,25 @@ struct ExpensesView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(groupedExpenses) { $group in
+                ForEach($groupedExpenses) { $group in
                     Section(group.groupTitle) {
                         ForEach(group.expenses) { expense in
+                            /// Card View
                             ExpenseCardView(expense: expense)
                                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                    //Delete button
+                                    /// Delete Button
                                     Button {
-                                        /// deleting data
+                                        /// Deleting Data
                                         context.delete(expense)
                                         withAnimation {
-                                            group.expenses.removeAll(where: {$0.id == expense.id})
+                                            group.expenses.removeAll(where: { $0.id == expense.id })
+                                            /// Removing Group, if no expenses present
                                             if group.expenses.isEmpty {
-                                                GroupedExpenses.removeAll(where: {$0.id == group.id})
+                                                groupedExpenses.removeAll(where: { $0.id == group.id })
                                             }
                                         }
                                     } label: {
-                                        Image(system: "trash")
+                                        Image(systemName: "trash")
                                     }
                                     .tint(.red)
                                 }
@@ -70,6 +72,7 @@ struct ExpensesView: View {
         }
         .sheet(isPresented: $addExpense){
             AddExpenseView()
+                .interactiveDismissDisabled()
         }
     }
 
@@ -103,5 +106,5 @@ struct ExpensesView: View {
 }
 
 #Preview {
-    ExpensesView()
+    ContentView()
 }

@@ -258,6 +258,7 @@ var body: some View {
 
     }
     .navigationTitle("Add Expense")
+    j.navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem (placement: .topBarLeading) {
         Button("Cancel") {
@@ -493,7 +494,7 @@ Musimy dodac do widoku kontekst modelu
 
 
 
-dodatkowo recznie musimy obsluuzyc sytuacje, ze jak z grupy usniemy wszystkie wydatki, to usuwamy grupę:
+dodatkowo ręcznie musimy obsłużyć sytuacje, ze jak z grupy usniemy wszystkie wydatki, to usuwamy także grupę:
 
 ```swift
 Button {
@@ -508,5 +509,272 @@ Button {
 } label: {
   Image(system: "trash")
 }
+```
+
+
+
+
+
+### CategoriesView
+
+Przechodzimy do categories View i zaczynamy od zkieletu naszej listy:
+
+```swift
+import SwiftUI
+import SwiftData
+
+struct CategoriesView: View {
+    var body: some View {
+      NavigationStack {
+        List {
+        }
+        .navigationTitle("Add Category")
+        .toolbar {
+          ToolbarItem (placement: .topBarTrailing) {
+            Button{
+                newCategory.toggle()
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title3)
+            }
+          }
+        }
+      }
+    }
+}
+```
+
+dodajemy Query do pobrania danych :
+
+```swift
+    @Query(sort: [
+        SortDescriptor(\Category.categoryName, order: .reverse)
+    ],animation:.snappy) private var allCategories: [Category]
+```
+
+Dodajemy overlay do wyswietlenia pustej strony gdy nie mamy zadnych kategorii:
+
+```swift
+.overlay {
+  if allCategories.isEmpty  {
+    ContentUnavailableView("No Categories", systemImage: "tray.fill")
+  }
+}
+```
+
+Wywołanie arkusza do dopisywania nowych kategorii:
+
+1. Zmienna lokalna do sterowania wyswietlaniem arkusza:
+
+   ```swift
+   @State private var newCategory: Bool = false
+   
+   //użyjemy jej przy przycisku 
+   
+   Button{
+     newCategory.toggle()
+   } label: {
+   ```
+
+   
+
+2. Definicja akcji zamknięcia bieżącego widoku, oraz kontekst magazynyu danych:
+
+   ```swift
+   @Environment(\.dismiss) private var dismiss
+   @Environment(\.modelContext) private var context
+   ```
+
+3. Zmienna do wpisywania nazwy kategorii:
+
+   ```swift
+   @State private var categoryName: String = ""
+   ```
+
+4. Wywołanie arkusza do wprowadzania kategorii:
+
+   ```swift
+   .sheet(isPresented: $newCategory) {
+   
+   } content: {
+     NavigationStack {
+       List {
+         Section("Title") {
+           TextField("General",text: $categoryName)
+         }
+       }
+       .navigationTitle("CategoryName")
+       .navigationBarTitleDisplayMode(.inline)
+       /// Ad and Cancel buttons
+       .toolbar {
+         ToolbarItem(placement: .topBarLeading) {
+           Button("Cancel") {
+             newCategory = false
+           }
+           .tint(.red)
+         }
+         ToolbarItem(placement: .topBarTrailing) {
+           Button("Add") {
+   
+           }
+           .disabled(categoryName.isEmpty)
+   
+         }
+       }
+     }
+   }
+   .presentationDetents([.height(180)])
+   .presentationCornerRadius(20)
+   .interactiveDismissDisabled()
+   ```
+
+5. Kod zapisujacy dane na przycisku Add:
+
+   ```swift
+   ToolbarItem(placement: .topBarTrailing) {
+     Button("Add") {
+       let category = Category(categoryName: categoryName)
+       context.insert(category)
+       //ClosingView
+       categoryName = ""
+       newCategory = false
+     }
+     .disabled(categoryName.isEmpty)
+   }
+   ```
+
+   
+
+6. W liscie iterujemy po kategoriach gdzie wyświetlamy kategorie i wydatki z niej, a jeśli nie ma wydatków to ContentUnavaiableView:
+
+```swift
+        List {
+            ForEach (allCategories) { category in
+                DisclosureGroup {
+                    if let expenses = category.expenses, !expenses.isEmpty {
+                        ForEach(expenses){ expense in
+                            ExpenseCardView(expense: expense)
+                        }
+                    } else {
+                        ContentUnavailableView{
+                            Label("No Expenses", systemImage: "tray.fill")
+                        }
+                    }
+                } label: {
+                    Text(category.categoryName)
+                }
+            }
+        }
+```
+
+Kompiluejmy aplikacje dodajemy kilka kategorii i potem kilka kosztow
+
+Niestety nasz picker kategorii nie pozwala na wybranie opcji - brak (None). Wiec jeśli jest potrzeba wpisywania kosztow nieskategoryzowanych, trzeba za pomoca menu zrobic jego odpowiednik:
+
+```swift
+Menu {
+  ForEach(allCategories) { category in
+                          Button(category.categoryName) {
+                            self.category = category
+                          }
+                         }
+  //None button
+  Button("None") {
+    category = nil
+  }
+} label: {
+  if let categoryName = category?.categoryName {
+    Text(categoryName)
+  } else {
+    Text("None")
+  }
+}
+//                        Picker("",selection: $category){
+//                            ForEach(allCategories) {
+//                                Text($0.categoryName)
+//                                    .tag($0)
+//                            }
+//
+//                        }
+//                        .pickerStyle(.menu)
+//                        .labelsHidden()
+```
+
+
+
+
+
+Możemy dodatkowo posortować nasze kategorie wg liczby wydatkow w każdej z nich:
+
+```swift
+    var body: some View {
+      NavigationStack {
+        List {
+            ForEach (allCategories.sorted(by: {
+                ($0.expenses?.count ?? 0) > ($1.expenses?.count ?? 0)
+            })) { ...}
+          ....
+```
+
+
+
+Na karcie wydatku chcemy wyswietlac jego kategorie, ale tylko na widoku z listy wydatków, bo jesli wyswietlamy z listy kategorii to dodatkowa kategoria jest tylko nadmiarowa.
+
+Wyświetlanie lub nie, uzależnimy od parametru dla widoku `ExpensecardView` :
+
+```swift
+    var displayTag: Bool = true
+```
+
+i jesli mamy wybrana kategorie i chcemy pokazywac ją :
+
+```swift
+struct ExpenseCardView: View {
+    @Bindable var expense: Expense
+    var displayTag: Bool = true
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading){
+                Text(expense.title)
+                Text(expense.subTitle)
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+
+                if let categoryName = expense.category?.categoryName, displayTag {
+                    Text(categoryName)
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal,10)
+                        .padding(.vertical,4)
+                        .background(.red.gradient,in: .capsule)
+                }
+            }
+            .lineLimit(1)
+```
+
+Co na widoku wydatkow daje taki efekt:
+
+ ![image-20231017143254284](image-20231017143254284.png)
+
+
+
+Ale na widoku kategorii już go nie chcemy:
+
+![image-20231017143343448](image-20231017143343448.png)
+
+Wylaczymy to za pomoca flagi display tag w widoku CategriesView:
+
+```swift
+                DisclosureGroup {
+                    if let expenses = category.expenses, !expenses.isEmpty {
+                        ForEach(expenses){ expense in
+                            ExpenseCardView(expense: expense,displayTag: false)
+                        }
+                    } else {
+                        ContentUnavailableView{
+                            Label("No Expenses", systemImage: "tray.fill")
+                        }
+                    }
+                }
 ```
 

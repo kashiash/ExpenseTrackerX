@@ -6,11 +6,100 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CategoriesView: View {
+    @Query(
+       // sort: [ SortDescriptor(\Category.categoryName, order: .reverse)],
+        animation:.snappy) private var allCategories: [Category]
+    @Environment(\.modelContext) private var context
+
+    @State private var newCategory: Bool = false
+    @State private var categoryName: String = ""
+
+    @Environment(\.dismiss) private var dismiss
+
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+      NavigationStack {
+        List {
+            ForEach (allCategories.sorted(by: {
+                ($0.expenses?.count ?? 0) > ($1.expenses?.count ?? 0)
+            })) { category in
+                DisclosureGroup {
+                    if let expenses = category.expenses, !expenses.isEmpty {
+                        ForEach(expenses){ expense in
+                            ExpenseCardView(expense: expense,displayTag: false)
+                        }
+                    } else {
+                        ContentUnavailableView{
+                            Label("No Expenses", systemImage: "tray.fill")
+                        }
+                    }
+                } label: {
+                    Text(category.categoryName)
+                }
+            }
+        }
+        .navigationTitle("Add Category")
+        .overlay {
+            if allCategories.isEmpty  {
+                ContentUnavailableView("No Categories", systemImage: "tray.fill")
+            }
+        }
+        .toolbar {
+
+          ToolbarItem (placement: .topBarTrailing) {
+            Button{
+                newCategory.toggle()
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title3)
+            }
+
+          }
+
+        }
+        .sheet(isPresented: $newCategory) {
+            categoryName = ""
+        } content: {
+            NavigationStack {
+                List {
+                    Section("Title") {
+                        TextField("General",text: $categoryName)
+                    }
+                }
+                .navigationTitle("CategoryName")
+                .navigationBarTitleDisplayMode(.inline)
+                /// Ad and Cancel buttons
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Cancel") {
+                            newCategory = false
+                        }
+                        .tint(.red)
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Add") {
+                            let category = Category(categoryName: categoryName)
+                            context.insert(category)
+                            //ClosingView
+                            categoryName = ""
+                            newCategory = false
+                        }
+                        .disabled(categoryName.isEmpty)
+                    }
+                }
+            }
+            .presentationDetents([.height(180)])
+            .presentationCornerRadius(20)
+            .interactiveDismissDisabled()
+        }
+
+      }
     }
+
+
 }
 
 #Preview {
