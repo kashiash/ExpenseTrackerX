@@ -823,3 +823,79 @@ Na podstawie pierwszej wyswietlimy alert w ktorym obsluzymy reszte procesu usuwa
       }
 ```
 
+Usuwanie danych na CategoryView nie odświeża nam ExpensesView, dlatego należy po przejściu z Category na Expense Tab wywolac odświeżenie. Użyjemy do tego zmiennej ktora bedzie nam wskazywać czy byliśmy na Categoriach czy na Wydatkach i jeśli wejdziemy do wydatkow z kategorii to odświeżymy widok:
+
+```swift
+.onChange(of: allExpenses,initial: true) { oldValue, newValue in
+                                          if newValue.count > oldValue.count || groupedExpenses.isEmpty || currentTab == "Categories" {
+                                            createGroupedExpenses(newValue)
+                                          }
+                                         }
+```
+
+Brakuje nam jeszcze wyszukiwania wydatków, najpierw definujemy zmienną na szukany tekst:
+
+```swift
+@State private var searchText: String = ""
+```
+
+i dodajemy modyfikator `searchable`:
+
+```swift
+            List {...}
+            .navigationTitle("Expenses")
+            .searchable(text: $searchText,placement: .navigationBarDrawer, prompt: Text("Search"))
+```
+
+Tutaj sprawa jest nieco skomplikowana bo mamy 2 kolekcje - pobraną z bazy i druga pogrupowaną:
+
+dodajemy kolekcje do przechowania pierwotnej listy :
+
+```swift
+    @State private var originalGroupedExpenses: [GroupedExpenses] = []
+```
+
+Wypełniamy ja po utworzeniu listy roboczej:
+
+```swift
+await MainActor.run {
+  groupedExpenses = sortedDict.compactMap({ dict in
+    let date = Calendar.current.date(from: dict.key) ?? .init()
+    return .init(date: date, expenses: dict.value)
+   })
+  originalGroupedExpenses = groupedExpenses
+}
+```
+
+filtrujemy w momecie zmiany naszej wartości `searchText` :
+
+```swift
+        .onChange(of: searchText, initial: true ) { oldValue, newValue in
+            if !newValue.isEmpty {
+                filterExpenses(newValue)
+            } else {
+                groupedExpenses = originalGroupedExpenses
+            }
+        }
+```
+
+i jeszcze definicja funkcji filtrującej (jeszcze raz zwracam uwage, ze interfejs moze byc tylko katualizowany przez główny wątek `MainActor` ):
+
+```swift
+func filterExpenses(_ text: String ){
+  Task.detached(priority: .high) {
+    let query = text.lowercased()
+    let filteredExpenses = originalGroupedExpenses.compactMap { group -> GroupedExpenses? in
+    let expenses = group.expenses.filter({$0.title.lowercased().contains(query)})
+    if expenses.isEmpty {
+        return nil
+    }
+    return .init(date: group.date, expenses:expenses)
+    }
+    await  MainActor.run {
+      groupedExpenses = filteredExpenses
+    }
+  }
+}
+```
+

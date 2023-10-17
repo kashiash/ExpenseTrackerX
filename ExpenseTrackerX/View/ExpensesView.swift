@@ -10,13 +10,15 @@ import SwiftData
 
 struct ExpensesView: View {
 
+    @Binding var currentTab: String
     @Query(sort: [
         SortDescriptor(\Expense.date, order: .reverse)
     ],animation:.snappy) private var allExpenses: [Expense]
 
     @State private var groupedExpenses: [GroupedExpenses] = []
+    @State private var originalGroupedExpenses: [GroupedExpenses] = []
     @State private var addExpense: Bool = false
-
+    @State private var searchText: String = ""
     @Environment(\.modelContext) private var context
 
     var body: some View {
@@ -49,6 +51,7 @@ struct ExpensesView: View {
                 }
             }
             .navigationTitle("Expenses")
+            .searchable(text: $searchText,placement: .navigationBarDrawer, prompt: Text("Search"))
             .overlay {
                 if allExpenses.isEmpty || groupedExpenses.isEmpty {
                     ContentUnavailableView("No Expenses", systemImage: "tray.fill")
@@ -65,14 +68,38 @@ struct ExpensesView: View {
                 }
             }
         }
+        .onChange(of: searchText, initial: true ) { oldValue, newValue in
+            if !newValue.isEmpty {
+                filterExpenses(newValue)
+            } else {
+                groupedExpenses = originalGroupedExpenses
+            }
+        }
         .onChange(of: allExpenses,initial: true) { oldValue, newValue in
-            if newValue.count > oldValue.count || groupedExpenses.isEmpty {
+            if newValue.count > oldValue.count || groupedExpenses.isEmpty || currentTab == "Categories" {
                 createGroupedExpenses(newValue)
             }
         }
         .sheet(isPresented: $addExpense){
             AddExpenseView()
                 .interactiveDismissDisabled()
+        }
+    }
+
+    func filterExpenses(_ text: String ) {
+        Task.detached(priority: .high) {
+            let query = text.lowercased()
+            let filteredExpenses = originalGroupedExpenses.compactMap { group -> GroupedExpenses? in
+                let expenses = group.expenses.filter({$0.title.lowercased().contains(query)})
+                if expenses.isEmpty {
+                    return nil
+                }
+                return .init(date: group.date, expenses:expenses)
+
+            }
+            await  MainActor.run {
+                groupedExpenses = filteredExpenses
+            }
         }
     }
 
@@ -100,6 +127,7 @@ struct ExpensesView: View {
                     return .init(date: date, expenses: dict.value)
 
                 })
+                originalGroupedExpenses = groupedExpenses
             }
         }
     }
