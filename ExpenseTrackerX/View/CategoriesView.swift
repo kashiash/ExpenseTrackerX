@@ -19,6 +19,8 @@ struct CategoriesView: View {
 
     @Environment(\.dismiss) private var dismiss
 
+    @State private var deleteRequest: Bool = false
+    @State private var requestedCategory: Category?
 
     var body: some View {
       NavigationStack {
@@ -39,9 +41,17 @@ struct CategoriesView: View {
                 } label: {
                     Text(category.categoryName)
                 }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button {
+                        deleteRequest.toggle()
+                        requestedCategory = category
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                }
             }
         }
-        .navigationTitle("Add Category")
+        .navigationTitle("Categories")
         .overlay {
             if allCategories.isEmpty  {
                 ContentUnavailableView("No Categories", systemImage: "tray.fill")
@@ -91,11 +101,29 @@ struct CategoriesView: View {
                     }
                 }
             }
+
             .presentationDetents([.height(180)])
             .presentationCornerRadius(20)
             .interactiveDismissDisabled()
         }
 
+      }
+      .alert("If you delete a category, all associated expenses will be deleted too.",isPresented: $deleteRequest) {
+          Button(role: .destructive) {
+            /// Deleting category
+              if let requestedCategory {
+                  context.delete(requestedCategory)
+                  self.requestedCategory = nil
+              }
+          } label: {
+              Text("Delete")
+          }
+
+          Button(role: .cancel) {
+              requestedCategory = nil
+          } label: {
+              Text("Cancel")
+          }
       }
     }
 

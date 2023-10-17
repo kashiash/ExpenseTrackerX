@@ -517,7 +517,7 @@ Button {
 
 ### CategoriesView
 
-Przechodzimy do categories View i zaczynamy od zkieletu naszej listy:
+Przechodzimy do categories View i zaczynamy od szkieletu naszej listy:
 
 ```swift
 import SwiftUI
@@ -528,7 +528,7 @@ struct CategoriesView: View {
       NavigationStack {
         List {
         }
-        .navigationTitle("Add Category")
+        .navigationTitle("Categories")
         .toolbar {
           ToolbarItem (placement: .topBarTrailing) {
             Button{
@@ -578,10 +578,9 @@ Wywołanie arkusza do dopisywania nowych kategorii:
 
    
 
-2. Definicja akcji zamknięcia bieżącego widoku, oraz kontekst magazynyu danych:
+2. Definicja  kontekstu magazynu danych:
 
    ```swift
-   @Environment(\.dismiss) private var dismiss
    @Environment(\.modelContext) private var context
    ```
 
@@ -762,7 +761,7 @@ Ale na widoku kategorii już go nie chcemy:
 
 ![image-20231017143343448](image-20231017143343448.png)
 
-Wylaczymy to za pomoca flagi display tag w widoku CategriesView:
+Wyłączymy to za pomoca flagi display tag w widoku CategriesView:
 
 ```swift
                 DisclosureGroup {
@@ -776,5 +775,51 @@ Wylaczymy to za pomoca flagi display tag w widoku CategriesView:
                         }
                     }
                 }
+```
+
+
+
+Dodamy teraz możliwość usunięcia kategorii. Pod DisclosureGroup dodajemy modyfikator .swpeActions z przyciskiem do usuwania:
+
+
+
+```swift
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button {
+                        deleteRequest.toggle()
+                        requestedCategory = category
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                }
+```
+
+do obslugi potrezbujemy 2ch zmiennych. Piersza z nich zainicjuje proces usuwania z pytaniem uzytkownika czy jest pewny tej akcji, a druga przekaze jaka kategoria ma byc skasowana:
+
+```swift
+    @State private var deleteRequest: Bool = false
+    @State private var requestedCategory: Category?
+```
+
+Na podstawie pierwszej wyswietlimy alert w ktorym obsluzymy reszte procesu usuwania danych :
+
+```swift
+      .alert("If you delete a category, all associated expenses will be deleted too.",isPresented: $deleteRequest) {
+          Button(role: .destructive) {
+            /// Deleting category
+              if let requestedCategory {
+                  context.delete(requestedCategory)
+                  self.requestedCategory = nil
+              }
+          } label: {
+              Text("Delete")
+          }
+
+          Button(role: .cancel) {
+              requestedCategory = nil
+          } label: {
+              Text("Cancel")
+          }
+      }
 ```
 
